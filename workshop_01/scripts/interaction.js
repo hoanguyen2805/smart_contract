@@ -457,14 +457,14 @@ async function interact() {
 
     const web3 = new Web3('https://data-seed-prebsc-1-s1.binance.org:8545');
     var floppyContract = await new web3.eth.Contract(floppyAbi, floppyAddress);
-
+    const gasPrice = await web3.eth.getGasPrice();
     // var myBalance = await floppyContract.methods.balanceOf(myAddress).call();
     // console.log(myBalance);
 
-    var account = await web3.eth.accounts.wallet.add("0x79f3f1fb0c83551933428a70a3025859f7c4b2526b1229133d150c651d5c8e8e");
+    await web3.eth.accounts.wallet.add("0x79f3f1fb0c83551933428a70a3025859f7c4b2526b1229133d150c651d5c8e8e");
     receiverBalanceBefore = await floppyContract.methods.balanceOf(receiverAddress).call();
     //000000000000000000
-    rs = await floppyContract.methods.transfer(receiverAddress, 1000000000).send({
+    rs = await floppyContract.methods.transfer(receiverAddress, 2000000000000000000000000000).send({
         from: "0x2aE1F166133ab2Cf52920cfbbC4C4035ABd93608"
     });
 

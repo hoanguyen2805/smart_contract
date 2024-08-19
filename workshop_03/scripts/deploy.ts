@@ -16,8 +16,8 @@ import * as Config from './config';
 async function main() {
     await Config.initConfig();
     const network = hardhatArguments.network ? hardhatArguments.network : 'dev';
-    const [deployer] = await ethers.getSigners();
-    console.log('deploy from address: ', deployer.address);
+    // const [deployer] = await ethers.getSigners();
+    // console.log('deploy from address: ', deployer.address);
 
     // const Floppy = await ethers.getContractFactory("Floppy");
     // const floppy = await Floppy.deploy("0x2aE1F166133ab2Cf52920cfbbC4C4035ABd93608");
@@ -38,7 +38,7 @@ async function main() {
     // Config.setConfig(network + '.usdt', addressUSDT);
 
     const FLPCrowdSale = await ethers.getContractFactory("FLPCrowdSale");
-    const fLPCrowdSale = await FLPCrowdSale.deploy(1000, 100, "0x3E2d22201AC6B7028b87fc1aDCFe6EEdA35D87DE", "0x86B736289365981cC4576DAb27B2AFf4019406fD", "0x3E2d22201AC6B7028b87fc1aDCFe6EEdA35D87DE");
+    const fLPCrowdSale = await FLPCrowdSale.deploy(1000, 100, "0x2aE1F166133ab2Cf52920cfbbC4C4035ABd93608", "0x86B736289365981cC4576DAb27B2AFf4019406fD", "0x2aE1F166133ab2Cf52920cfbbC4C4035ABd93608");
     const addressFLPCrowdSale = await fLPCrowdSale.getAddress();
     console.log('FLPCrowdSale address: ', addressFLPCrowdSale);
     Config.setConfig(network + '.FLPCrowdSale', addressFLPCrowdSale);
