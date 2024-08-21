@@ -1,4 +1,4 @@
-var web3;
+var web3 = new Web3(window.ethereum);
 var contract;
 var contractUSDT;
 var account = null;
@@ -1367,117 +1367,145 @@ const contractUsdtABI = [
     }
 ]
 
-$(document).ready(function () {
-    function shortenAddress(address) {
-        const firstPart = address.slice(0, 4);
-        const lastPart = address.slice(-4);
-        return `${firstPart}...${lastPart}`;
-    }
+function shortenAddress(address) {
+    const firstPart = address.slice(0, 4);
+    const lastPart = address.slice(-4);
+    return `${firstPart}...${lastPart}`;
+}
 
-    function truncateToFourDecimals(str) {
-        const strNumber = web3.utils.fromWei(str, 'ether');// Chuyển đổi số dư từ Wei sang Ether để dễ đọc.
-        const index = strNumber.indexOf(".");
-        if (index !== -1) {
-            const decimalPart = strNumber.substring(index + 1, index + 5);
-            const truncatedNumber = strNumber.substring(0, index + 5);
-    
-            // Kiểm tra nếu phần thập phân chỉ chứa số 0
-            if (decimalPart === "0000") {
-                return strNumber.substring(0, index); // Bỏ luôn phần thập phân
-            }
-            return truncatedNumber;
+function truncateToFourDecimals(str) {
+    const strNumber = web3.utils.fromWei(str, 'ether');// Chuyển đổi số dư từ Wei sang Ether để dễ đọc.
+    const index = strNumber.indexOf(".");
+    if (index !== -1) {
+        const decimalPart = strNumber.substring(index + 1, index + 5);
+        const truncatedNumber = strNumber.substring(0, index + 5);
+
+        // Kiểm tra nếu phần thập phân chỉ chứa số 0
+        if (decimalPart === "0000") {
+            return strNumber.substring(0, index); // Bỏ luôn phần thập phân
         }
-        return strNumber; // Trường hợp chuỗi không có phần thập phân
+        return truncatedNumber;
     }
+    return strNumber; // Trường hợp chuỗi không có phần thập phân
+}
 
-    async function connectWallet() {
-        if (window.ethereum) {
-            try {
-                
-                web3 = new Web3(window.ethereum);
-
-                // get address wallet
-                await window.ethereum.request({ method: "eth_requestAccounts" });
-                const accounts = await web3.eth.getAccounts();
-                account = accounts[0];
-                $('#btn-connect-wallet').text(shortenAddress(account));
-                
-                //get balance
-                contract = new web3.eth.Contract(contractABI, contractAddress);
-                contractUSDT = new web3.eth.Contract(contractUsdtABI, contractUSDTAddress);
-                await getBalanceBNB();
-                await getBalanceUSDT();
-                $('#table-balance').removeClass('d-none');
-            } catch (error) {
-                console.error("User denied account access", error);
-            }
-        } else {
-            alert("No Ethereum browser extension detected, install MetaMask on desktop or visit from a dApp browser on mobile.");
-        }
-    }
-
-    async function getBalanceBNB() {
-        await web3.eth.getBalance(account).then(balance => {
-            $('#balance-bnb').text(truncateToFourDecimals(balance));
+async function buyNFTByUSDT(tokenId, price) {
+    await contractUSDT.methods.approve(contractAddress, price).send({
+        from: account,
+    });
+    // Tạo giao dịch mua
+    await contract.methods.buyNFTByUSDT(tokenId, price).send({
+        from: account
+    })
+        .on('transactionHash', function (hash) {
+            console.log("Transaction Hash:", hash);
+        })
+        .on('receipt', function (receipt) {
+            console.log("Transaction was mined successfully:", receipt);
+        })
+        .on('error', function (error) {
+            console.error("Error buying NFT:", error);
         });
+}
+
+async function buyNFT(id, price) {
+    if (account) {
+        buyNFTByUSDT(id, price)
+    } else {
+        await connectWallet();
+        await buyNFTByUSDT(id, price);
     }
-    async function getBalanceUSDT() {
-        const balance = await contractUSDT.methods.balanceOf(account).call();
-        $('#balance-usdt').text(truncateToFourDecimals(balance));
+}
+
+async function connectWallet() {
+    if (window.ethereum) {
+        try {
+            // get address wallet
+            await window.ethereum.request({ method: "eth_requestAccounts" });
+            const accounts = await web3.eth.getAccounts();
+            account = accounts[0];
+            $('#btn-connect-wallet').text(shortenAddress(account));
+            
+            //get balance
+            contract = new web3.eth.Contract(contractABI, contractAddress);
+            contractUSDT = new web3.eth.Contract(contractUsdtABI, contractUSDTAddress);
+            await getBalanceBNB();
+            await getBalanceUSDT();
+            $('#table-balance').removeClass('d-none');
+        } catch (error) {
+            console.error("User denied account access", error);
+        }
+    } else {
+        alert("No Ethereum browser extension detected, install MetaMask on desktop or visit from a dApp browser on mobile.");
+    }
+}
+
+async function getBalanceBNB() {
+    await web3.eth.getBalance(account).then(balance => {
+        $('#balance-bnb').text(truncateToFourDecimals(balance));
+    });
+}
+async function getBalanceUSDT() {
+    const balance = await contractUSDT.methods.balanceOf(account).call();
+    $('#balance-usdt').text(truncateToFourDecimals(balance));
+}
+
+async function getTokenMetadata(tokenId) {
+    const contractNFT = new window.web3.eth.Contract(contractABI, contractAddress);
+    const tokenURI = await contractNFT.methods.tokenURI(tokenId).call();
+    return `${tokenURI}`;
+}
+
+async function getOwnedTokens() {
+    const tokens = await contract.methods.listTokenIds(account).call();
+    return tokens;
+}
+
+$(document).ready(function () {
+
+    async function renderContent() {
+        var str = "";
+        $('#content').empty();
+        const contractNFT = new window.web3.eth.Contract(contractABI, contractAddress);
+        const list = await contractNFT.methods.getListNFT().call();
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].forSale) {
+                // console.log(list[i]);
+                const img = await getTokenMetadata(list[i].id);
+                str += `
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <div class="bg-image hover-zoom ripple shadow-1-strong rounded">
+                        <img src="${img}" style="width: 100%; height: 200px; object-fit: cover"/>
+                        <a href="#!">
+                            <div class="mask" style="background-color: rgba(0, 0, 0, 0.3);">
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <h5 style="margin-left: 10px;"><span class="badge bg-body-tertiary text-dark">${web3.utils.fromWei(list[i].price, 'ether')} USDT</span></h5>
+                                    <button class="btn btn-primary mr-2" style="margin: 10px;" onclick="buyNFT(${list[i].id}, ${list[i].price})">Buy</button>
+                                </div>
+                            </div>
+                            <div class="hover-overlay">
+                                <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                `
+            }
+        }
+        $('#content').append(str);
     }
 
-    async function getOwnedTokens() {
-        const tokens = await contract.methods.listTokenIds(account).call();
-        return tokens;
-    }
-
-    async function getTokenMetadata(tokenId) {
-        const tokenURI = await contract.methods.tokenURI(tokenId).call();
-        // Fetch metadata from tokenURI (usually a JSON file stored on IPFS or a web server)
-        // const response = await fetch(tokenURI);
-        // const metadata = await response.json();
-
-        return `${tokenURI}`;
-    }
+    renderContent();   
 
     $('#btn-connect-wallet').click(async function () {
         await connectWallet();
-        // var tokens = await getOwnedTokens();
-        // var strHtml = "";
-        // for (let i = 0; i < tokens.length; i++) {
-        //     var meta = await getTokenMetadata(tokens[i]);
-        //     strHtml += `<p>MetaData ID = ${tokens[i]}: ${meta}<p>`;
-        // }
-        //$('#meta-data').html(strHtml);
-        await contract.methods.getListNFT().call();
+        
     })
 
-    async function buyNFT(contractAddress, contractABI, tokenId, price) {
-        // const account = await connectWallet();
 
-        const contract = new window.web3.eth.Contract(contractABI, contractAddress);
-
-        // Tạo giao dịch mua
-        contract.methods.buyNFT(tokenId).send({
-            from: account,
-            value: window.web3.utils.toWei(price.toString(), "ether") // Chuyển giá thành đơn vị wei
-        })
-            .on('transactionHash', function (hash) {
-                console.log("Transaction Hash:", hash);
-            })
-            .on('receipt', function (receipt) {
-                console.log("Transaction was mined successfully:", receipt);
-            })
-            .on('error', function (error) {
-                console.error("Error buying NFT:", error);
-            });
-    }
 
     async function listNFT(contractAddress, contractABI, tokenId, price) {
-        // const account = await connectWallet();
-
         const contract = new window.web3.eth.Contract(contractABI, contractAddress);
-
         // Tạo giao dịch liệt kê NFT để bán
         contract.methods.listNFT(tokenId, window.web3.utils.toWei(price.toString(), "ether")).send({
             from: account
