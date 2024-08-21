@@ -12,7 +12,7 @@ async function main() {
     // Config.setConfig(network + '.Hero', addressVault);
 
     const NFTMarketplace = await ethers.getContractFactory("NFTMarketplace");
-    const nftMarketplace = await NFTMarketplace.deploy("0x09a89Ce3c07E400CA3ad6478321badd0B9c8edD9");
+    const nftMarketplace = await NFTMarketplace.deploy("0x09a89Ce3c07E400CA3ad6478321badd0B9c8edD9", "0xCa1A17EFb5794C606D949E25740068D8DA2b44ae");
     const addressNFTMarketplace = await nftMarketplace.getAddress();
     console.log('NFTMarketplace address: ', addressNFTMarketplace);
     Config.setConfig(network + '.NFTMarketplace', addressNFTMarketplace);
