@@ -4,7 +4,8 @@ var contractUSDT;
 var account = null;
 const contractAddress = "0xC2a4321a33c3e8b0A738f34f5412CD98757Ac52e";
 const contractUSDTAddress = "0xCa1A17EFb5794C606D949E25740068D8DA2b44ae";
-
+// $.LoadingOverlay("show");
+// $.LoadingOverlay("hide");
 $('#nftModal').on('show.bs.modal', function (event) {
     // Nút kích hoạt modal
     var button = event.relatedTarget;
@@ -13,8 +14,9 @@ $('#nftModal').on('show.bs.modal', function (event) {
     var id = button.getAttribute('data-id');
     var price = button.getAttribute('data-price');
     var sale = button.getAttribute('data-sale');
-
+    
     $('#nftModalLabel').text(`NFT ID: ${id}`);
+    $('#input-id').val(id);
     $('#input-price').val(price);
     if (sale == "true") {
         $('#input-for-sale').prop('checked', true);
@@ -23,6 +25,46 @@ $('#nftModal').on('show.bs.modal', function (event) {
     }
     
 });
+
+$('#btn-update-nft').click(async function() {
+    var id = $('#input-id').val();
+    var price = $('#input-price').val();
+    var sale = $('#input-for-sale').prop('checked');
+    if (price <= 0) {
+        alert('Enter price greater than 0');
+        return;
+    }
+    $.LoadingOverlay("show");
+    try {
+        await updatePrice(id, price);
+        await updateForSale(id, sale);
+    } catch (e) {
+        console.log(e);
+    }
+    $('#nftModal').modal('hide');
+    await renderMyNFT();
+    $.LoadingOverlay("hide");
+})
+
+async function updatePrice(tokenId, price) {
+    // try{
+        // $.LoadingOverlay("show");
+        await contract.methods.updateNFTPrice(tokenId, web3.utils.toWei(price, 'ether')).send({
+            'from': account
+        });
+    // } catch(e) {
+        // console.log(e);
+    // }
+    // $('#nftModal').modal('hide');
+    // await renderMyNFT();
+    // $.LoadingOverlay("hide");
+}
+
+async function updateForSale(tokenId, sale) {
+    await contract.methods.updateNFTSale(tokenId, sale).send({
+        'from': account
+    });
+}
 
 function shortenAddress(address) {
     const firstPart = address.slice(0, 4);
@@ -157,7 +199,7 @@ async function renderMyNFT() {
                                 Edit
                             </button>
                         </div>
-                        <button style="position: absolute; top: -31px" class="btn btn-success btn-sm">${nft.forSale ? 'For Sale' : 'Not For Sale'}</button>
+                        <button style="position: absolute; top: -31px" class="btn ${nft.forSale ? 'btn-danger' : 'btn-success'} btn-sm">${nft.forSale ? 'For Sale' : 'Not For Sale'}</button>
                     </div>
                     <div class="hover-overlay">
                         <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
