@@ -10,8 +10,8 @@
 </head>
 </head>
 
-<body>
-    <section style="background-color: #eee;">
+<body style="background-color: #eee; min-height: 100vh;">
+    <section >
         <div class="container py-5">
 
             <div class="row">
@@ -32,24 +32,25 @@
 
             <h4 class="text-center mb-5"><strong>NFT Collection</strong></h4>
 
-            <div class="row" id="content">
-                <!-- <div class="col-lg-4 col-md-12 mb-4">
-                    <div class="bg-image hover-zoom ripple shadow-1-strong rounded">
-                        <img src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/E-commerce/new/img(1).webp"
-                            class="w-100" />
-                        <a href="#!">
-                            <div class="mask" style="background-color: rgba(0, 0, 0, 0.3);">
-                                <div class="d-flex justify-content-between align-items-baseline">
-                                    <h5 style="margin-left: 10px;"><span class="badge bg-body-tertiary text-dark">$123</span></h5>
-                                    <button class="btn btn-primary mr-2" style="margin: 10px;">Buy</button>
-                                </div>
-                            </div>
-                            <div class="hover-overlay">
-                                <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
-                            </div>
-                        </a>
+            <div class="row" id="">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                      <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Buy NFT</button>
+                      <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">My NFT</button>
                     </div>
-                </div> -->
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                        <div class="row mt-3" id="nft-sell">
+
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                        <div class="row mt-3" id="my-nft">
+
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

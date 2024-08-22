@@ -1425,13 +1425,14 @@ async function connectWallet() {
             const accounts = await web3.eth.getAccounts();
             account = accounts[0];
             $('#btn-connect-wallet').text(shortenAddress(account));
-            
+
             //get balance
             contract = new web3.eth.Contract(contractABI, contractAddress);
             contractUSDT = new web3.eth.Contract(contractUsdtABI, contractUSDTAddress);
             await getBalanceBNB();
             await getBalanceUSDT();
             $('#table-balance').removeClass('d-none');
+            renderMyNFT();
         } catch (error) {
             console.error("User denied account access", error);
         }
@@ -1456,50 +1457,104 @@ async function getTokenMetadata(tokenId) {
     return `${tokenURI}`;
 }
 
-async function getOwnedTokens() {
-    const tokens = await contract.methods.listTokenIds(account).call();
+async function getAnNFT(tokenId) {
+    const token = await contract.methods.getNFT(tokenId).call();
+    return token;
+}
+
+async function getMyNFT() {
+    var tokens = [];
+    if (account) {
+        tokens = await contract.methods.listTokenIds(account).call();
+    } else {
+        await connectWallet();
+        // tokens = await contract.methods.listTokenIds(account).call();
+    }
     return tokens;
 }
 
+async function getOwnerNFT(tokenId) {
+    const addressOwner = await contract.methods.ownerOf(tokenId).call();
+    return addressOwner;
+}
+
+async function renderMyNFT() {
+    var str = "";
+    $('#my-nft').empty();
+    const listIdNFT = await getMyNFT();
+    for (let i = 0; i < listIdNFT.length; i++) {
+        const img = await getTokenMetadata(listIdNFT[i]);
+        const nft = await getAnNFT(listIdNFT[i]);
+        str += `
+        <div class="col-lg-4 col-md-12 mb-4">
+            <div class="bg-image hover-zoom ripple shadow-1-strong rounded">
+                <img src="${img}" style="width: 100%; height: 200px; object-fit: cover"/>
+                <a href="#!">
+                    <div class="mask" style="background-color: rgba(0, 0, 0, 0.3);">
+                        <div class="d-flex justify-content-between align-items-baseline">
+                            <h5 style="margin-left: 10px;"><span class="badge bg-body-tertiary text-dark">ID: ${listIdNFT[i]} | Price: ${web3.utils.fromWei(nft.price, 'ether')} USDT</span></h5>
+                            <button class="btn btn-primary mr-2" style="margin: 10px;" onclick="buyNFT(${listIdNFT[i]}, ${nft.price})">Buy</button>
+                        </div>
+                    </div>
+                    <div class="hover-overlay">
+                        <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        `
+    }
+    $('#my-nft').append(str);
+}
+
+async function renderNFTSell() {
+    var str = "";
+    $('#nft-sell').empty();
+    const contractNFT = new window.web3.eth.Contract(contractABI, contractAddress);
+    const list = await contractNFT.methods.getListNFT().call();
+    for (let i = 0; i < list.length; i++) {
+        if (list[i].forSale) {
+            // console.log(list[i]);
+            const img = await getTokenMetadata(list[i].id);
+            if (account) {
+                const addressOwnerNFT = await getOwnerNFT(list[i].id);
+                if (account == addressOwnerNFT) {
+                    continue;
+                }
+            }
+            str += `
+            <div class="col-lg-4 col-md-12 mb-4">
+                <div class="bg-image hover-zoom ripple shadow-1-strong rounded">
+                    <img src="${img}" style="width: 100%; height: 200px; object-fit: cover"/>
+                    <a href="#!">
+                        <div class="mask" style="background-color: rgba(0, 0, 0, 0.3);">
+                            <div class="d-flex justify-content-between align-items-baseline">
+                                <h5 style="margin-left: 10px;"><span class="badge bg-body-tertiary text-dark">ID: ${list[i].id} | Price: ${web3.utils.fromWei(list[i].price, 'ether')} USDT</span></h5>
+                                <button class="btn btn-primary mr-2" style="margin: 10px;" onclick="buyNFT(${list[i].id}, ${list[i].price})">Buy</button>
+                            </div>
+                        </div>
+                        <div class="hover-overlay">
+                            <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            `
+        }
+    }
+    $('#nft-sell').append(str);
+}
+
+renderNFTSell();
+
+renderMyNFT();
+
 $(document).ready(function () {
 
-    async function renderContent() {
-        var str = "";
-        $('#content').empty();
-        const contractNFT = new window.web3.eth.Contract(contractABI, contractAddress);
-        const list = await contractNFT.methods.getListNFT().call();
-        for (let i = 0; i < list.length; i++) {
-            if (list[i].forSale) {
-                // console.log(list[i]);
-                const img = await getTokenMetadata(list[i].id);
-                str += `
-                <div class="col-lg-4 col-md-12 mb-4">
-                    <div class="bg-image hover-zoom ripple shadow-1-strong rounded">
-                        <img src="${img}" style="width: 100%; height: 200px; object-fit: cover"/>
-                        <a href="#!">
-                            <div class="mask" style="background-color: rgba(0, 0, 0, 0.3);">
-                                <div class="d-flex justify-content-between align-items-baseline">
-                                    <h5 style="margin-left: 10px;"><span class="badge bg-body-tertiary text-dark">${web3.utils.fromWei(list[i].price, 'ether')} USDT</span></h5>
-                                    <button class="btn btn-primary mr-2" style="margin: 10px;" onclick="buyNFT(${list[i].id}, ${list[i].price})">Buy</button>
-                                </div>
-                            </div>
-                            <div class="hover-overlay">
-                                <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                `
-            }
-        }
-        $('#content').append(str);
-    }
-
-    renderContent();   
 
     $('#btn-connect-wallet').click(async function () {
         await connectWallet();
-        
+
     })
 
 
