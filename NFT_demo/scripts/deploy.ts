@@ -11,13 +11,13 @@ async function main() {
     // const usdt = await USDT.deploy("0x09a89Ce3c07E400CA3ad6478321badd0B9c8edD9");
     // const addressUSDT = await usdt.getAddress();
     // console.log('USDT address: ', addressUSDT);
-    // Config.setConfig(network + '.usdt', addressUSDT);
+    // Config.setConfig(network + '.USDT', addressUSDT);
 
-    const NFTLabubu = await ethers.getContractFactory("NFTLabubu");
-    const nftLabubu = await NFTLabubu.deploy("0x09a89Ce3c07E400CA3ad6478321badd0B9c8edD9", "0xE577d319Fc4a7A5aF56f9ca3cd211F6d7af974E9");
-    const addressNFTLabubu = await nftLabubu.getAddress();
-    console.log('NFTLabubu address: ', addressNFTLabubu);
-    Config.setConfig(network + '.NFTLabubu', addressNFTLabubu);
+    const NFTLaBuBu = await ethers.getContractFactory("NFTLabubu");
+    const nftLaBuBu = await NFTLaBuBu.deploy("0x09a89Ce3c07E400CA3ad6478321badd0B9c8edD9", "0x9dB96aBB88C94C3A42059beaB7EfC8795FE5C25A");
+    const addressNFTLaBuBu = await nftLaBuBu.getAddress();
+    console.log('NFTLaBuBu address: ', addressNFTLaBuBu);
+    Config.setConfig(network + '.NFTLaBuBu', addressNFTLaBuBu);
 
 
     await Config.updateConfig();
