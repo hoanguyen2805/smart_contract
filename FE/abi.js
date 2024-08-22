@@ -1,4 +1,4 @@
-export const contractABI = [
+const contractABI = [
     {
         "inputs": [
             {
@@ -916,7 +916,7 @@ export const contractABI = [
         "type": "function"
     }
 ]
-export const contractUsdtABI = [
+const contractUsdtABI = [
     {
         "inputs": [
             {
