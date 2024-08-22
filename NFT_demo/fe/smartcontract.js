@@ -1433,14 +1433,12 @@ async function connectWallet() {
             await getBalanceUSDT();
             $('#table-balance').removeClass('d-none');
             renderMyNFT();
-            
         } catch (error) {
             console.error("User denied account access", error);
         }
     } else {
         alert("No Ethereum browser extension detected, install MetaMask on desktop or visit from a dApp browser on mobile.");
     }
-    renderNFTSell();
 }
 
 async function getBalanceBNB() {
@@ -1470,6 +1468,7 @@ async function getMyNFT() {
         tokens = await contract.methods.listTokenIds(account).call();
     } else {
         await connectWallet();
+        // tokens = await contract.methods.listTokenIds(account).call();
     }
     return tokens;
 }
@@ -1488,27 +1487,23 @@ async function renderMyNFT() {
         const nft = await getAnNFT(listIdNFT[i]);
         str += `
         <div class="col-lg-4 col-md-12 mb-4">
-            <div class="bg-image hover-zoom ripple shadow-1-strong rounded" style="position: relative">
+            <div class="bg-image hover-zoom ripple shadow-1-strong rounded">
                 <img src="${img}" style="width: 100%; height: 200px; object-fit: cover"/>
                 <a href="#!">
-                    <div class="mask" style="background-color: rgba(0, 0, 0, 0.3); position: relative">
+                    <div class="mask" style="background-color: rgba(0, 0, 0, 0.3);">
                         <div class="d-flex justify-content-between align-items-baseline">
-                            <h5 style="margin-left: 10px">
-                                <span class="badge bg-body-tertiary text-dark" style="background: white">Price: ${web3.utils.fromWei(nft.price, 'ether')} USDT</span>
-                            </h5>
-                            <button class="btn btn-primary mr-2"
+                            <h5 style="margin-left: 10px;"><span class="badge bg-body-tertiary text-dark">ID: ${listIdNFT[i]} | Price: ${web3.utils.fromWei(nft.price, 'ether')} USDT</span></h5>
+                            <button class="btn btn-primary mr-2" disabled 
                                 style="margin: 10px;" onclick=""
                             >
-                                Edit
+                                ${nft.forSale ? 'bán' : 'không bán'}
                             </button>
                         </div>
-                        <button style="position: absolute; top: -31px" class="btn btn-success btn-sm">${nft.forSale ? 'For Sale' : 'Not For Sale'}</button>
                     </div>
                     <div class="hover-overlay">
                         <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
                     </div>
                 </a>
-                <button style="position: absolute; top: 0px" class="btn btn-secondary btn-sm">ID: ${listIdNFT[i]}</button>
             </div>
         </div>
         `
@@ -1523,6 +1518,7 @@ async function renderNFTSell() {
     const list = await contractNFT.methods.getListNFT().call();
     for (let i = 0; i < list.length; i++) {
         if (list[i].forSale) {
+            // console.log(list[i]);
             const img = await getTokenMetadata(list[i].id);
             if (account) {
                 const addressOwnerNFT = await getOwnerNFT(list[i].id);
@@ -1532,14 +1528,12 @@ async function renderNFTSell() {
             }
             str += `
             <div class="col-lg-4 col-md-12 mb-4">
-                <div class="bg-image hover-zoom ripple shadow-1-strong rounded" style="position: relative">
+                <div class="bg-image hover-zoom ripple shadow-1-strong rounded">
                     <img src="${img}" style="width: 100%; height: 200px; object-fit: cover"/>
                     <a href="#!">
                         <div class="mask" style="background-color: rgba(0, 0, 0, 0.3);">
                             <div class="d-flex justify-content-between align-items-baseline">
-                                <h5 style="margin-left: 10px;">
-                                    <span class="badge bg-body-tertiary text-dark" style="background: white">Price: ${web3.utils.fromWei(list[i].price, 'ether')} USDT</span>
-                                </h5>
+                                <h5 style="margin-left: 10px;"><span class="badge bg-body-tertiary text-dark">ID: ${list[i].id} | Price: ${web3.utils.fromWei(list[i].price, 'ether')} USDT</span></h5>
                                 <button class="btn btn-primary mr-2" style="margin: 10px;" onclick="buyNFT(${list[i].id}, ${list[i].price})">Buy</button>
                             </div>
                         </div>
@@ -1547,7 +1541,6 @@ async function renderNFTSell() {
                             <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
                         </div>
                     </a>
-                    <button style="position: absolute; top: 0px" class="btn btn-secondary btn-sm">ID: ${list[i].id}</button>
                 </div>
             </div>
             `
@@ -1556,7 +1549,7 @@ async function renderNFTSell() {
     $('#nft-sell').append(str);
 }
 
-// renderNFTSell();
+renderNFTSell();
 
 renderMyNFT();
 
@@ -1565,6 +1558,7 @@ $(document).ready(function () {
 
     $('#btn-connect-wallet').click(async function () {
         await connectWallet();
+
     })
 
 
