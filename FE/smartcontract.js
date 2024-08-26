@@ -42,6 +42,9 @@ $('#btn-update-nft').click(async function() {
     }
     $('#nftModal').modal('hide');
     await renderMyNFT();
+    await getBalanceBNB();
+    await getBalanceUSDT();
+    await renderNFTSale();
     $.LoadingOverlay("hide");
 })
 
@@ -99,12 +102,23 @@ async function buyNFTByUSDT(tokenId, price) {
 }
 
 async function buyNFT(id, price) {
-    if (account) {
-        buyNFTByUSDT(id, price)
-    } else {
-        await connectWallet();
-        await buyNFTByUSDT(id, price);
+    $.LoadingOverlay("show");
+    try {
+        if (account) {
+            await buyNFTByUSDT(id, price)
+        } else {
+            await connectWallet();
+            await buyNFTByUSDT(id, price);
+        }
+    } catch (e) {
+        console.log(e);
     }
+
+    await renderMyNFT();
+    await renderNFTSale();
+    await getBalanceBNB();
+    await getBalanceUSDT();
+    $.LoadingOverlay("hide");
 }
 
 async function connectWallet() {
@@ -246,14 +260,18 @@ async function renderNFTSale() {
 
 $(document).ready(function () {
 
-    function initData() {
+    async function initData() {
+        $.LoadingOverlay("show");
         // connectWallet();
-        renderNFTSale();
+        await renderNFTSale();
+        $.LoadingOverlay("hide");
     }
 
     initData();
 
     $('#btn-connect-wallet').click(async function () {
+        $.LoadingOverlay("show");
         await connectWallet();
+        $.LoadingOverlay("hide");
     })
 });
