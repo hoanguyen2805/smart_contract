@@ -36,8 +36,7 @@ $('#btn-update-nft').click(async function() {
     }
     $.LoadingOverlay("show");
     try {
-        await updatePrice(id, price);
-        await updateForSale(id, sale);
+        await updateNFTPriceAndSale(id, price, sale);
     } catch (e) {
         console.log(e);
     }
@@ -46,22 +45,8 @@ $('#btn-update-nft').click(async function() {
     $.LoadingOverlay("hide");
 })
 
-async function updatePrice(tokenId, price) {
-    // try{
-        // $.LoadingOverlay("show");
-        await contract.methods.updateNFTPrice(tokenId, web3.utils.toWei(price, 'ether')).send({
-            'from': account
-        });
-    // } catch(e) {
-        // console.log(e);
-    // }
-    // $('#nftModal').modal('hide');
-    // await renderMyNFT();
-    // $.LoadingOverlay("hide");
-}
-
-async function updateForSale(tokenId, sale) {
-    await contract.methods.updateNFTSale(tokenId, sale).send({
+async function updateNFTPriceAndSale(tokenId, price, sale) {
+    await contract.methods.updateNFTPriceAndSale(tokenId, web3.utils.toWei(price, 'ether'), sale).send({
         'from': account
     });
 }
@@ -89,6 +74,12 @@ function truncateToFourDecimals(str) {
 }
 
 async function buyNFTByUSDT(tokenId, price) {
+    const addressOwnerNFT = await getOwnerNFT(tokenId);
+    if (addressOwnerNFT == account) {
+        alert("This NFT is yours, no need to buy it.");
+        return false;
+    }
+
     await contractUSDT.methods.approve(contractAddress, price).send({
         from: account,
     });
