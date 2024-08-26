@@ -476,7 +476,7 @@ const contractABI = [
                         "type": "bool"
                     }
                 ],
-                "internalType": "struct NFTMarketplace.NFT[]",
+                "internalType": "struct NFTLabubu.NFT[]",
                 "name": "",
                 "type": "tuple[]"
             }
@@ -517,7 +517,7 @@ const contractABI = [
                         "type": "bool"
                     }
                 ],
-                "internalType": "struct NFTMarketplace.NFT",
+                "internalType": "struct NFTLabubu.NFT",
                 "name": "",
                 "type": "tuple"
             }
@@ -893,6 +893,29 @@ const contractABI = [
             }
         ],
         "name": "updateNFTPrice",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "nftId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "is_sale",
+                "type": "bool"
+            }
+        ],
+        "name": "updateNFTPriceAndSale",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

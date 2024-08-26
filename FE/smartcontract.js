@@ -2,8 +2,8 @@ var web3 = new Web3(window.ethereum);
 var contract;
 var contractUSDT;
 var account = null;
-const contractAddress = "0xC2a4321a33c3e8b0A738f34f5412CD98757Ac52e";
-const contractUSDTAddress = "0xCa1A17EFb5794C606D949E25740068D8DA2b44ae";
+const contractAddress = "0x8Eb4268D2571E67310ddc85AEC465d0C48A19EdF";
+const contractUSDTAddress = "0xE5D167112E59Ff101f61C42EA361157669477C90";
 // $.LoadingOverlay("show");
 // $.LoadingOverlay("hide");
 $('#nftModal').on('show.bs.modal', function (event) {

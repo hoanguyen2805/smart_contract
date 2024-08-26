@@ -59,6 +59,13 @@ contract NFTLabubu is ERC721Enumerable, ERC721URIStorage, Ownable {
         nfts[nftId].forSale = is_sale;
     }
 
+    function updateNFTPriceAndSale(uint256 nftId, uint256 price, bool is_sale) public {
+        require(ownerOf(nftId) == msg.sender, "Only the owner can update price");
+        require(price > 0, "Price must be greater than 0");
+        nfts[nftId].price = price;
+        nfts[nftId].forSale = is_sale;
+    }
+
     // lấy ra thông tin của 1 NFT
     function getNFT(uint256 nftId) public view returns (NFT memory) {
         return nfts[nftId];
